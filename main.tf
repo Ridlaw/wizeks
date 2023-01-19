@@ -30,13 +30,13 @@ resource "aws_instance" "wizmongodb" {
   }
 
   provisioner "file" {
-    source      = "~/wiz/wizeks"
+    source      = "~/wiz_project/wizeks"
     destination = "/home/ubuntu"
 
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("~/Downloads/myseckey.cer")
+      private_key = file("~/Desktop/demokeypair.pem")
       host        = self.public_dns
     }
   }
