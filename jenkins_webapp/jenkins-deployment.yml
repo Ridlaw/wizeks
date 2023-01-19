@@ -1,0 +1,52 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-sa
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-app
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccountName: jenkins-sa
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts
+          envFrom:
+          - configMapRef:
+              name: mongo-config
+          - secretRef:
+              name: mongodb-password
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+            requests:
+              memory: "500Mi"
+              cpu: "500m"
+          ports:
+            - name: httpport
+              containerPort: 8080
+            - name: jnlpport
+              containerPort: 50000
+          volumeMounts:
+            - name: mongodb-volume-secret
+              mountPath: /etc/mongojenkins      
+      volumes:
+      - name: mongodb-volume-secret
+        secret:
+          secretName: mongodb-connstring 
+

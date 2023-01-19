@@ -1,0 +1,152 @@
+
+
+
+EKS
+https://www.techtarget.com/searchcloudcomputing/tutorial/How-to-deploy-an-EKS-cluster-using-Terraform
+
+eks to mongo backup
+https://www.youtube.com/watch?v=EXvRwOuGpQo
+
+https://www.linkedin.com/pulse/devops-toolkit-backing-up-mongodb-aws-ec2-s3-saurabh-bhandari
+
+
+mongo backup
+https://medium.com/alturasoluciones/how-to-backup-our-mongodb-and-push-the-file-into-aws-s3-in-ubuntu-a7adee3923f9
+
+instance profile for S3 and ec2
+https://devopslearning.medium.com/aws-iam-ec2-instance-role-using-terraform-fa2b21488536
+
+Connect to MongoDB
+https://indianceo.medium.com/how-to-connect-to-your-remote-mongodb-server-68725a8e53f
+
+
+Jenkins
+https://octopus.com/blog/jenkins-helm-install-guide
+
+https://devopscube.com/setup-jenkins-on-kubernetes-cluster/#:~:text=Create%20a%20service%20account%20with,application%20on%20a%20Node%20Port.
+
+
+
+$mongo
+use admin
+db.createUser(
+  {
+    user: "yusadmin",
+    pwd: "123Mongo",
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+  }
+)
+
+exit
+
+sudo vim /etc/mongod.conf
+change IP to 0.0.0.0
+security:
+  authorization: enabled
+
+sudo systemctl restart mongod
+
+Enter shell using 'mongo'
+use admin
+db.auth('yusadmin')
+
+use interview
+db.createUser({
+    user: 'yuswiz',
+    pwd: '123Mongo',
+    roles: [{ role: 'readWrite', db:'interview'}]
+})
+
+% db.createUser(
+%   {
+%     user: "yuswiz",
+%     pwd: "123Mongo",
+%     roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+%   }
+% )
+
+mongo -u yuswiz -p --authenticationDatabase admin
+
+mongo -u yuswiz -p 123Mongo 44.201.113.79/interview
+
+mongodb://writeApp:writeApp5299@127.0.0.1:27017/writeapp
+
+
+db.auth('yuswiz')
+db.interview.insert(
+   [
+     { _id: 11, item: "pencil", qty: 50, type: "no.2" },
+     { _id: 12, item: "pen", qty: 20 },
+     { _id: 13, item: "eraser", qty: 25 }
+   ]
+)
+
+db.auth(username)
+show dbs 
+show collections 
+db.collectionname.find()
+
+
+db.employee.insertOne( { name: "mark" } )
+
+db.student.insert([{Name: "Bablu", Marks: 550}, 
+           {Name: "Chintu", Marks: 430},
+                   {Name: "Devanshu", Marks: 499}])
+
+
+
+db.createUser(
+  {
+    user: "reportsUser",
+    pwd: passwordPrompt(),  // or cleartext password
+    roles: [
+       { role: "read", db: "reporting" },
+       { role: "read", db: "products" },
+       { role: "read", db: "sales" },
+       { role: "readWrite", db: "accounts" }
+    ]
+  }
+)
+
+# Open crontab
+crontab -e
+
+0 0 * * * /bin/bash ~/bin/db-backups.sh >> ~/logs/db_backups.log 2>&1
+0 0 * * * /bin/bash ~/wizeks/backup.sh >> ~/logs/backup.log 2>&1
+
+mongorestore -u 'user' -p 'password -d 'database' -c 'collection' 'path to file'
+
+connstring: mongodb://yuswiz:123Mongo@44.201.113.79:27017/interview
+
+mongodb://yuswiz:123Mongo@44.201.113.79:27017/interview?ssl=true
+
+#connect_string = 'mongodb+srv://yuswiz:123Mongo@44.201.113.79:27017/interview?retryWrites=true&w=majority'
+#connect_string = 'mongodb+srv://<username>:<password>@<atlas cluster>/<myFirstDatabase>?retryWrites=true&w=majority' 
+
+echo xxx | base64 --decode
+
+echo mongodb://yuswiz:123Mongo@44.201.113.79:27017/interview | base64 
+
+kubectl exec -c jenkins myjenkins-0 -- tar czf /tmp/backup.tar.gz /var/jenkins_home
+kubectl cp -c jenkins myjenkins-0:/tmp/backup.tar.gz ./backup.tar.gz
+
+# Enabled OIDC IAM in existing EKS Cluster
+eksctl utils associate-iam-oidc-provider --cluster=wiz-eks-cluster --region us-east-1 --approve
+
+
+#Creating the Amazon EBS CSI driver IAM role for service accounts
+eksctl create iamserviceaccount \
+  --region us-east-1 \
+  --name ebs-csi-controller-sa \
+  --namespace kube-system \
+  --cluster wiz-eks-cluster \
+  --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
+  --approve \
+  --role-only \
+  --role-name AmazonEKS_EBS_CSI_DriverRole
+
+
+# Adding the Amazon EBS CSI add-on
+eksctl create addon --name aws-ebs-csi-driver --region us-east-1 --cluster wiz-eks-cluster --service-account-role-arn arn:aws:iam::686613815102:role/AmazonEKS_EBS_CSI_DriverRole --force
+
+kubectl get secret example-mongodb-admin-my-user -n mongodb -o json | jq -r '.data | with_entries(.value |= @base64d)'

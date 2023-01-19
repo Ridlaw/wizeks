@@ -1,0 +1,6 @@
+.dccache
+*.txt
+*.tfst*
+*.hcl
+*terraf*
+*.backup
