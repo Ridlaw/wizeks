@@ -4,7 +4,7 @@ pipeline {
         stage('Connect to MongoDB') {
             steps {
                 script {
-                    def mongo = new MongoClient("bW9uZ29kYjovL3JpZHdpelVzZXI6MTIzTW9uZ29AMy44MS42NS4xOTI6MjcwMTcvdGVzdA==")
+                    def mongo = new MongoClient("mongodb://ridwizUser:123Mongo@18.212.132.144:27017/test")
                 }
             }
         }
