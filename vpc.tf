@@ -1,12 +1,23 @@
+# 1. Create VPC
 resource "aws_vpc" "main_vpc" {
   cidr_block           = lookup(var.awsvar, "cidr")
-  enable_dns_hostnames = true
+  enable_dns_hostnames = true # Any instance we create in our vpc will have a dns name.
 
   tags = {
     Name = "Wiz-vpc"
   }
 }
 
+# 2. Create Internet Gateway and Attach it to VPC
+resource "aws_internet_gateway" "internet_gateway" {
+  vpc_id = aws_vpc.main_vpc.id
+
+  tags = {
+    Name = "Wiz-IGW"
+  }
+}
+
+# 3. Create Public Subnet 
 resource "aws_subnet" "subnet_public" {
   cidr_block              = lookup(var.awsvar, "pubsubnet")
   vpc_id                  = aws_vpc.main_vpc.id
@@ -19,35 +30,80 @@ resource "aws_subnet" "subnet_public" {
   }
 }
 
+# 4. Create (Public) Route Table
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.main_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.internet_gateway.id
+  }
+  tags = {
+    Name = "Public-route-table"
+  }
+}
+
+# 5. Associate "Public Route Table" to Public Subnet 
+resource "aws_route_table_association" "public_subnet_association" {
+  route_table_id = aws_route_table.public_route_table.id
+  subnet_id      = aws_subnet.subnet_public.id
+}
+
+# 6. Create Private Subnet 
 resource "aws_subnet" "subnet_private" {
   cidr_block              = lookup(var.awsvar, "prisubnet")
   vpc_id                  = aws_vpc.main_vpc.id
   availability_zone       = "${lookup(var.awsvar, "region")}a"
-  map_public_ip_on_launch = false
+  map_public_ip_on_launch = false    # Any instance/resource launched into the subnet should be assigned a public IP address. Default is false
 
   tags = {
     Name = "Private-subnet"
   }
 }
 
-# resource "aws_subnet" "subnet_private2" {
-#   cidr_block        = lookup(var.awsvar, "prisubnet2")
-#   vpc_id            = aws_vpc.main_vpc.id
-#   availability_zone = "${lookup(var.awsvar, "region")}c"
+# 7. Create (Private) Route Table
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main_vpc.id
 
-#   tags = {
-#     Name = "Private-subnet2"
-#   }
-# }
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.privateconn.id
+  }
+  tags = {
+    Name = "Private-route-table"
+  }
+}
+
+# 8. Associate "Private Route Table" to Private Subnet 
+resource "aws_route_table_association" "private" {
+  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.subnet_private.id
+}
+
+# 9. Allocate Elastic IP Address for NAT
+resource "aws_eip" "nat_eip" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.internet_gateway]
+}
+
+# 10. Create Nat Gateway in Public Subnet 
+resource "aws_nat_gateway" "privateconn" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.subnet_public.id
+
+  tags = {
+    Name = "NAT-GW"
+  }
+  depends_on = [aws_internet_gateway.internet_gateway]
+}
 
 
-# Create Security Group for an EC2 instance
+# 11. Create a security group to allow port 22, 27017, 80
 resource "aws_security_group" "WIZSecGroup" {
   name        = lookup(var.awsvar, "secgroupname")
   description = lookup(var.awsvar, "secgroupname")
   vpc_id      = aws_vpc.main_vpc.id
 
-  // To Allow SSH Transport
   ingress {
     from_port   = 22
     protocol    = "tcp"
@@ -61,7 +117,6 @@ resource "aws_security_group" "WIZSecGroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  // To Allow Port 80 Transport
   ingress {
     from_port   = 80
     protocol    = "tcp"
@@ -80,98 +135,3 @@ resource "aws_security_group" "WIZSecGroup" {
     create_before_destroy = true
   }
 }
-
-resource "aws_internet_gateway" "internet_gateway" {
-  vpc_id = aws_vpc.main_vpc.id
-
-  tags = {
-    Name = "Wiz-IGW"
-  }
-}
-resource "aws_route_table" "public_route_table" {
-  vpc_id = aws_vpc.main_vpc.id
-
-  tags = {
-    Name = "Public-route-table"
-  }
-}
-
-resource "aws_route" "igw_route" {
-  route_table_id         = aws_route_table.public_route_table.id
-  gateway_id             = aws_internet_gateway.internet_gateway.id
-  destination_cidr_block = "0.0.0.0/0"
-}
-
-
-resource "aws_route_table_association" "public_subnet_association" {
-  route_table_id = aws_route_table.public_route_table.id
-  subnet_id      = aws_subnet.subnet_public.id
-}
-
-resource "aws_eip" "nat_eip" {
-  vpc        = true
-  depends_on = [aws_internet_gateway.internet_gateway]
-}
-
-resource "aws_nat_gateway" "privateconn" {
-  allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.subnet_public.id
-
-  tags = {
-    Name = "NAT-GW"
-  }
-  depends_on = [aws_internet_gateway.internet_gateway]
-}
-
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main_vpc.id
-
-  tags = {
-    Name = "Private-route-table"
-  }
-}
-
-resource "aws_route" "private_nat_gateway" {
-  route_table_id         = aws_route_table.private.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.privateconn.id
-}
-
-resource "aws_route_table_association" "private" {
-  route_table_id = aws_route_table.private.id
-  subnet_id      = aws_subnet.subnet_private.id
-}
-
-# resource "aws_nat_gateway" "privateconn2" {
-#   allocation_id = aws_eip.nat_eip2.id
-#   subnet_id     = aws_subnet.subnet_public.id
-
-#   tags = {
-#     Name = "NAT-GW2"
-#   }
-#   depends_on = [aws_internet_gateway.internet_gateway]
-# }
-
-# resource "aws_eip" "nat_eip2" {
-#   vpc        = true
-#   depends_on = [aws_internet_gateway.internet_gateway]
-# }
-
-# resource "aws_route_table" "private2" {
-#   vpc_id = aws_vpc.main_vpc.id
-
-#   tags = {
-#     Name = "Private-route-table2"
-#   }
-# }
-
-# resource "aws_route" "private_nat_gateway2" {
-#   route_table_id         = aws_route_table.private2.id
-#   destination_cidr_block = "0.0.0.0/0"
-#   nat_gateway_id         = aws_nat_gateway.privateconn2.id
-# }
-
-# resource "aws_route_table_association" "private2" {
-#   route_table_id = aws_route_table.private2.id
-#   subnet_id      = aws_subnet.subnet_private2.id
-# }

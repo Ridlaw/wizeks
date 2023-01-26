@@ -15,12 +15,13 @@
 # 8) Set up a daily backup at midnight via `crontab -e`:
 #    0 0 * * * /home/ubuntu/backup.sh > /home/ubuntu/backup.log
 
+HOST="localhost"
 
 MONGODUMP_PATH="/usr/bin/mongodump"
 
-MONGO_DATABASE="interview"
+MONGO_DATABASE="test"
 
-MONGO_USER="yuswiz"
+MONGO_USER="ridwizUser"
 
 MONGO_PASS="123Mongo"
 
@@ -32,7 +33,12 @@ TIME=`/bin/date --date='+5 hour 30 minutes' '+%d-%m-%Y-%I-%M-%S-%p'`
 
 # Create backup
 
+# $MONGODUMP_PATH -d $MONGO_DATABASE -h $HOST   #when no authentication set 
+
+# $MONGODUMP_PATH -u $MONGO_USER -p $MONGO_PASS -d $MONGO_DATABASE --authenticationDatabase=admin     #use admin credentials
+
 $MONGODUMP_PATH -u $MONGO_USER -p $MONGO_PASS -d $MONGO_DATABASE
+
 
 mv dump mongodb-backup
 

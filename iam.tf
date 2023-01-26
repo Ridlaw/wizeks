@@ -23,11 +23,6 @@ EOF
   }
 }
 
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile"
-  role = aws_iam_role.ec2_role.name
-}
-
 resource "aws_iam_role_policy" "ec2_policy" {
   name = "ec2_policy"
   role = aws_iam_role.ec2_role.id
@@ -45,12 +40,17 @@ resource "aws_iam_role_policy" "ec2_policy" {
       "Effect": "Allow",
       "Resource": "arn:aws:s3:::wizmongo12345/*"
     },
-    {
-            "Action": "ec2:*",
+    {                                 
+            "Action": "ec2:*",              
             "Effect": "Allow",
             "Resource": "*"
         }
   ]
 }
 EOF
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ec2_role.name
 }

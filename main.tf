@@ -1,6 +1,5 @@
 provider "aws" {
   region = lookup(var.awsvar, "region")
-  # profile = lookup(var.awsvar, "profile")
 }
 
 
@@ -30,13 +29,13 @@ resource "aws_instance" "wizmongodb" {
   }
 
   provisioner "file" {
-    source      = "~/wiz_project/wizeks"
-    destination = "/home/ubuntu"
+    source      = "~/Desktop/wiz_project/wizeks/backup.sh"
+    destination = "/home/ubuntu/backup.sh"
 
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("~/Desktop/demokeypair.pem")
+      private_key = file("~/Desktop/wizdemokeypair.pem")
       host        = self.public_dns
     }
   }
@@ -52,5 +51,6 @@ resource "aws_instance" "wizmongodb" {
 
 output "ec2instancepublicIP" {
   value = aws_instance.wizmongodb.public_ip
+  description = "The public IP of the mongodb server" 
 }
 

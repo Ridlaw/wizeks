@@ -4,7 +4,6 @@ resource "aws_security_group" "EksSecGroup" {
   vpc_id = aws_vpc.main_vpc.id
 
 
-  // To Allow Port 80 Transport
   ingress {
     from_port   = 0
     to_port     = 0

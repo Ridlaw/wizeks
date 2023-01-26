@@ -20,8 +20,8 @@ resource "aws_eks_node_group" "worker-node-group" {
   node_group_name = "wiz-worker-nodes"
   node_role_arn   = aws_iam_role.workernodes.arn
   subnet_ids      = [aws_subnet.subnet_private.id, aws_subnet.subnet_public.id]
-  instance_types  = ["t2.medium"]
-  
+  instance_types  = ["t2.small"]
+
 
   remote_access {
     ec2_ssh_key = lookup(var.awsvar, "keyname")

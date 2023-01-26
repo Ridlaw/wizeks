@@ -4,3 +4,4 @@
 *.hcl
 *terraf*
 *.backup
+*.DS_Store

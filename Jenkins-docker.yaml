@@ -1,0 +1,51 @@
+# Running Docker inside a Jenkins container in Kubernetes is not recommended for production use cases. 
+# It can cause issues with performance, security, and reliability. It's mostly used for testing and development purposes
+# After creating the deployment, if error, run sudo chmod 777 /var/run/docker.sock on container node. This is not advice in production
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:lts
+        ports:
+        - containerPort: 8080
+        - containerPort: 50000
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+        - name: docker-bin
+          mountPath: /usr/bin/docker
+        securityContext:                      # securityContext is set to privileged so that the container(jenkins) can access the host's Docker daemon.
+          privileged: true
+      nodeSelector:                           # use label and selector to place pod on a particular node
+        type: development
+      volumes:
+      - name: jenkins-home
+        emptyDir: {}
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+      - name: docker-bin
+        hostPath:
+          path: /usr/bin/docker
+
+# This deployment file creates a deployment named "jenkins" with one replica of the Jenkins container. 
+# It uses the Jenkins LTS image and it exposes the ports 8080 and 50000. The deployment mounts hostPath for the Docker socket and binary inside the container. 
+# The volumeMounts also mount the /var/jenkins_home volume to persist Jenkins data. 
+# The securityContext is set to privileged so that the container can access the host's Docker daemon.

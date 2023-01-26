@@ -9,7 +9,7 @@ COL='\033[1;34m'
 NOC='\033[0m'
 
 ##########################################################################################
-aws eks --region us-east-1 update-kubeconfig --name wiz-eks-cluster
+aws eks update-kubeconfig --region us-east-1  --name wiz-eks-cluster
 ##########################################################################################
 cat <<EOF > mongodbconfig.yml 
 apiVersion: v1
@@ -17,7 +17,7 @@ kind: Secret
 metadata:
   name: mongodb-connstring
 data: 
-  mongoconnstring: bW9uZ29kYjovL3l1c3dpejoxMjNNb25nb0A0NC4yMDEuMTEzLjc5OjI3MDE3L2ludGVydmlldwo=
+  mongoconnstring: bW9uZ29kYjovL3JpZHdpelVzZXI6MTIzTW9uZ29AMTguMjEyLjEzMi4xNDQ6MjcwMTcvdGVzdA==
 type: Opaque 
 ---
 apiVersion: v1
@@ -25,15 +25,15 @@ kind: Secret
 metadata:
   name: mongodb-password
 data: 
-  password: MTIzTW9uZ28K
+  password: MTIzTW9uZ28=
 type: Opaque 
 ---
 apiVersion: v1
 data:
-  HOST: 44.201.113.79
+  HOST: 18.212.132.144
   PORT: "27017"
-  DATABASE: "interview"
-  USER: "yuswiz"
+  DATABASE: "test"
+  USER: "ridwizUser"
 kind: ConfigMap
 metadata:
   creationTimestamp: null
@@ -193,9 +193,9 @@ kubectl create clusterrolebinding permissive-binding \
 
 # kubectl delete clusterrolebinding permissive-binding
 
-# kubectl cp /Users/yustao/wiz/wizeks/mongoDB.sh jenkins-app-564688c6c4-d7bgr:/var/jenkins_home
-
 # k exec jenkins-app-564688c6c4-d7bgr -it bash 
+
+# kubectl cp /Users/yustao/wiz/wizeks/mongoDB.sh jenkins-app-564688c6c4-d7bgr:/var/jenkins_home
 
 # helm repo add mongodb https://mongodb.github.io/helm-charts
 
