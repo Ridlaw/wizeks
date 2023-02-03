@@ -3,7 +3,7 @@ kind: Secret
 metadata:
   name: mongodb-connstring
 data: 
-  mongoconnstring: bW9uZ29kYjovL3JpZHdpelVzZXI6MTIzTW9uZ29AMTguMjEyLjEzMi4xNDQ6MjcwMTcvdGVzdA==
+  mongoconnstring: bW9uZ29kYjovL3JpZHdpelVzZXI6MTIzTW9uZ29AMy44Mi40NS41MToyNzAxNy90ZXN0
 type: Opaque 
 ---
 apiVersion: v1
@@ -16,7 +16,7 @@ type: Opaque
 ---
 apiVersion: v1
 data:
-  HOST: 18.212.132.144
+  HOST: 3.82.45.51
   PORT: "27017"
   DATABASE: "test"
   USER: "ridwizUser"

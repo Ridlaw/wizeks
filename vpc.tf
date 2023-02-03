@@ -1,3 +1,7 @@
+# There are specific AWS VPC requirements when creating vpc for eks cluster. some of them are;
+# When you create an eks cluster, you specify a VPC and at least two subnets that are in different Availability Zones.
+# VPC with public and private subnets so that Kubernetes can create public load balancers in the public subnets that load balance traffic to pods running on worker nodes that are in private subnets
+
 # 1. Create VPC
 resource "aws_vpc" "main_vpc" {
   cidr_block           = lookup(var.awsvar, "cidr")
@@ -22,7 +26,8 @@ resource "aws_subnet" "subnet_public" {
   cidr_block              = lookup(var.awsvar, "pubsubnet")
   vpc_id                  = aws_vpc.main_vpc.id
   availability_zone       = "${lookup(var.awsvar, "region")}b"
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = true      # Any instance/resource launched into the subnet should be assigned a public IP address. Default is false
+
 
 
   tags = {
@@ -55,7 +60,6 @@ resource "aws_subnet" "subnet_private" {
   vpc_id                  = aws_vpc.main_vpc.id
   availability_zone       = "${lookup(var.awsvar, "region")}a"
   map_public_ip_on_launch = false    # Any instance/resource launched into the subnet should be assigned a public IP address. Default is false
-
   tags = {
     Name = "Private-subnet"
   }

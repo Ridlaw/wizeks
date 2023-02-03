@@ -1,4 +1,4 @@
-
+# When you create an eks cluster, you specify a VPC and at least two subnets that are in different Availability Zones for high availabilty.
 resource "aws_eks_cluster" "wiz-eks-cluster" {
   name     = "wiz-eks-cluster"
   role_arn = aws_iam_role.wizeksiamrole.arn
@@ -20,7 +20,7 @@ resource "aws_eks_node_group" "worker-node-group" {
   node_group_name = "wiz-worker-nodes"
   node_role_arn   = aws_iam_role.workernodes.arn
   subnet_ids      = [aws_subnet.subnet_private.id, aws_subnet.subnet_public.id]
-  instance_types  = ["t2.small"]
+  instance_types  = ["t2.micro"]
 
 
   remote_access {
