@@ -15,7 +15,7 @@
 # 8) Set up a daily backup at midnight via `crontab -e`:
 #    0 0 * * * /home/ubuntu/backup.sh > /home/ubuntu/backup.log
 
-HOST="localhost"
+# HOST="localhost"
 
 MONGODUMP_PATH="/usr/bin/mongodump"
 
